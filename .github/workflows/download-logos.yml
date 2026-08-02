@@ -29,3 +29,12 @@ jobs:
           git add logos
           git commit -m "Descargar logos" || echo "Nada que commitear"
           git push
+
+      - name: Purgar cache de jsDelivr
+        run: |
+          for file in logos/*; do
+            nombre=$(basename "$file")
+            url="https://purge.jsdelivr.net/gh/${{ github.repository }}@main/logos/$nombre"
+            echo "Purgando: $url"
+            curl -s "$url" > /dev/null
+          done
