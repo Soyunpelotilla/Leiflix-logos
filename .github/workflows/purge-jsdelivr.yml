@@ -1,0 +1,32 @@
+name: Purge jsDelivr cache
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'logos/**'
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detectar logos cambiados
+        id: changes
+        run: |
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          git diff --name-only HEAD^ HEAD -- 'logos/*' >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Purgar en jsDelivr
+        run: |
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            url="https://purge.jsdelivr.net/gh/${{ github.repository }}@main/$file"
+            echo "Purgando: $url"
+            curl -s "$url" > /dev/null
+          done <<< "${{ steps.changes.outputs.files }}"
