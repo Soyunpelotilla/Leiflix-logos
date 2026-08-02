@@ -6,6 +6,9 @@ on:
     paths:
       - 'logos/**'
 
+permissions:
+  contents: write
+
 jobs:
   purge:
     runs-on: ubuntu-latest
@@ -30,3 +33,14 @@ jobs:
             echo "Purgando: $url"
             curl -s "$url" > /dev/null
           done <<< "${{ steps.changes.outputs.files }}"
+
+      - name: Actualizar version.json
+        run: echo "{\"v\":\"$(date +%s)\"}" > version.json
+
+      - name: Commit version.json
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add version.json
+          git commit -m "Actualizar version" || echo "Nada que commitear"
+          git push
