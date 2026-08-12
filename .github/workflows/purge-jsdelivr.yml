@@ -35,7 +35,9 @@ jobs:
           done <<< "${{ steps.changes.outputs.files }}"
 
       - name: Actualizar version.json
-        run: echo "{\"v\":\"$(date +%s)\"}" > version.json
+        run: |
+          CHANGED=$(git diff --name-only HEAD^ HEAD -- 'logos/*' | jq -R . | jq -s .)
+          echo "{\"v\":\"$(date +%s)\",\"changed\":$CHANGED}" > version.json
 
       - name: Commit version.json
         run: |
